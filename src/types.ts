@@ -7,6 +7,7 @@ export type JournalEntry = {
   sentiment?: Sentiment;
   sentimentScore?: number;
   embedding?: number[];
+  tags?: ThemeTag[];
 };
 
 export type InsightSummary = {
@@ -17,3 +18,16 @@ export type InsightSummary = {
   themeKeywords: string[];
   generatedAt: string;
 };
+
+export type ThemeTag =
+  | "energized"
+  | "tired"
+  | "drained"
+  | "stressed"
+  | "calm"
+  | "anxious"
+  | "creative"
+  | "social"
+  | "rest"
+  | "focused"
+  | "grateful";

@@ -143,16 +143,18 @@ a {
   flex-wrap: wrap;
 }
 
-.nav a {
+.nav-btn {
   padding: 0.6rem 1rem;
   border-radius: var(--radius-full);
   border: 1px solid transparent;
   color: var(--text-secondary);
+  background: transparent;
+  cursor: pointer;
   transition: var(--transition-base);
 }
 
-.nav a:hover,
-.nav a.active {
+.nav-btn:hover,
+.nav-btn.active {
   background: var(--accent-soft);
   border-color: var(--border-hover);
   color: var(--accent);
@@ -172,8 +174,8 @@ a {
   backdrop-filter: blur(12px);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: var(--space-xl);
-  margin-bottom: var(--space-lg);
+  padding: calc(var(--space-xl) + 0.25rem);
+  margin-bottom: calc(var(--space-xl) + 0.5rem);
   box-shadow: var(--shadow-md);
 }
 
@@ -193,6 +195,11 @@ a {
   gap: var(--space-sm);
   justify-content: center;
   margin-top: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.panel + .panel {
+  margin-top: var(--space-lg);
 }
 
 .grid {
@@ -202,6 +209,14 @@ a {
 
 .grid.two {
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  column-gap: var(--space-lg);
+  row-gap: calc(var(--space-xl) + 0.5rem);
+  margin-top: var(--space-xl);
 }
 
 button {
@@ -258,6 +273,21 @@ button:hover {
   padding: var(--space-lg);
 }
 
+.callout {
+  margin-top: var(--space-sm);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+}
+
+.callout.danger {
+  border-color: #f87171;
+  background: rgba(239, 68, 68, 0.08);
+  color: #fecdd3;
+}
+
 label {
   display: block;
   color: var(--text-secondary);
@@ -311,6 +341,26 @@ textarea {
   border-radius: var(--radius-md);
   padding: var(--space-md);
   margin-top: var(--space-sm);
+}
+
+.entry-list {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.entry-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.entry-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-sm);
 }
 
 .empty-state {
