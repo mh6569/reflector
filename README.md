@@ -143,18 +143,18 @@ export type InsightSummary = {
 ## Architecture (Mermaid)
 ```mermaid
 flowchart TD
-    UI[React UI<br/>Entry form + insights] -->|analyze| NLP[Local AI]
-    NLP --> Sent[Sentiment (SST-2)]
-    NLP --> Embed[Embeddings (MiniLM)]
-    NLP --> Tags[Rule-based themes]
-    NLP --> Clust[Cosine clustering]
-    Sent --> Enriched[Enriched entries]
+    UI["React UI (entry + insights)"] -->|analyze| NLP["Local AI"]
+    NLP --> Sent["Sentiment (SST-2)"]
+    NLP --> Embed["Embeddings (MiniLM)"]
+    NLP --> Tags["Rule-based themes"]
+    NLP --> Clust["Cosine clustering"]
+    Sent --> Enriched["Enriched entries"]
     Embed --> Enriched
     Tags --> Enriched
-    Clust --> Insights[Template summaries<br/>deterministic]
+    Clust --> Insights["Template summaries (deterministic)"]
     Enriched --> Insights
     Insights --> UI
-    UI --> Store[(In-memory demo<br/>Planned: encrypted IndexedDB)]
+    UI --> Store["In-memory demo (planned: encrypted IndexedDB)"]
     Store --> UI
 ```
 
