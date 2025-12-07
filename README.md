@@ -85,7 +85,6 @@ Reflector integrates small Hugging Face models through transformers.js to proces
 ### **Data Model Design**
 
 ```ts
-```ts
 export type ThemeTag =
   | "energized" | "tired" | "drained" | "stressed" | "calm" | "anxious"
   | "creative" | "social" | "rest" | "focused" | "grateful";
@@ -124,6 +123,7 @@ export type InsightSummary = {
 - Planned storage hardening: encrypted IndexedDB for entries/embeddings/summaries with Web Crypto; keys remain client-side. No server round-trips.
 - Model integrity: pin model IDs/versions; consider bundling weights locally or serving from a trusted origin to avoid remote fetch at runtime.
 - Explainability: deterministic themes and template summaries make outputs auditable; sentiment/tags/embeddings are inspectable per entry.
+- Auth (future): optional local-first login (device/biometric). If cloud sync is ever added, encrypt client-side with user-held keys so plaintext never leaves the device.
 
 ### Model loading considerations
 - Hugging Face models via transformers.js can be heavy to fetch/compile in-browser. First-load latency depends on network and device; caching helps, but offline bundling or local hosting is recommended for reliability.
@@ -138,3 +138,28 @@ export type InsightSummary = {
 - **Performance**: quantized models, web workers for inference, pooling/limiting embeddings to recent N entries.
 - **Personalization**: per-user tag weighting and prompt tuning based on their history (still local-only).
 - **Robustness**: clearer error UX when models can’t load; fallback to last-known tags/summaries without sending data off-device.
+- **Auth (future)**: optional local-first login with biometric/device credentials; never store raw entries off-device. If cloud sync is added, encrypt client-side with user-held keys; no server access to plaintext.
+
+## Architecture (Mermaid)
+```mermaid
+flowchart TD
+    UI[React UI<br/>Entry form + insights] -->|analyze| NLP[Local AI]
+    NLP --> Sent[Sentiment (SST-2)]
+    NLP --> Embed[Embeddings (MiniLM)]
+    NLP --> Tags[Rule-based themes]
+    NLP --> Clust[Cosine clustering]
+    Sent --> Enriched[Enriched entries]
+    Embed --> Enriched
+    Tags --> Enriched
+    Clust --> Insights[Template summaries<br/>deterministic]
+    Enriched --> Insights
+    Insights --> UI
+    UI --> Store[(In-memory demo<br/>Planned: encrypted IndexedDB)]
+    Store --> UI
+```
+
+## Limitations
+- Local model downloads can be slow or blocked; bundling or trusted local hosting is recommended.
+- Text generation is avoided to protect privacy and latency; summaries are template-based over local analytics.
+- Current demo stores entries in-memory only; encrypted persistence is planned.
+- On-device performance varies; quantization and worker offloading may be needed for low-powered devices.
