@@ -1,7 +1,7 @@
 # Reflector — Design Document
 
 ## Executive Summary
-Reflector is a privacy-first, AI-powered journaling companion that helps users build consistent reflection habits while uncovering meaningful patterns in their emotional life. Designed to run entirely on-device, Reflector ensures complete privacy and true data ownership. The system guides users with contextual prompts, surfaces insights from their writing, and generates gentle summaries that help them understand themselves over time.
+Reflector is a privacy-first, AI-powered journaling companion that helps users build consistent reflection habits while uncovering meaningful patterns in their emotional life. Designed to run on-device with small, local models, Reflector keeps your data private while still providing adaptive prompts, semantic tags, and gentle summaries grounded in your own entries.
 
 ---
 
@@ -44,83 +44,52 @@ These summaries help users connect the dots in their own lives without manual ef
 
 ## 2. System Overview
 
-Reflector is designed as a lightweight, privacy-preserving journaling system that runs entirely on the user’s device.  
-The architecture is intentionally simple, fast, and modular, with three core layers:
+Reflector is designed as a lightweight, privacy-preserving journaling system that runs locally. The architecture is intentionally simple, fast, and modular:
 
-### **1. User Interface Layer (React)**
-- Minimal, distraction-free writing interface  
-- Daily contextual prompts  
-- Views for past entries, mood trends, and summaries  
-- Responsive design for desktop and mobile  
+### UI (React/TypeScript)
+- Minimal writing interface with a context-aware prompt above the entry box
+- Views for entries (newest-first) and on-demand insights
+- No text leaves the device; all analysis is local
 
-### **2. Local AI Layer (Transformers.js)**
-Reflector uses small Hugging Face transformer models compiled for JavaScript, running fully in the browser through `@xenova/transformers`.
+### Local AI (transformers.js)
+- Sentiment: `Xenova/distilbert-base-uncased-finetuned-sst-2-english`
+- Embeddings: `Xenova/all-MiniLM-L6-v2` for similarity/clustering
+- Theme tagging: rule-based semantic tags (energized, stressed, creative, rest, etc.) derived from text + sentiment
+- Insights: deterministic templates over per-entry signals, activity cues, and embedding clusters (no text generation at runtime)
 
-Local AI tasks include:
-- Sentiment analysis for each entry  
-- Embedding generation to capture semantic meaning  
-- Lightweight clustering and keyword extraction  
-- Generation of weekly or monthly insight summaries  
-
-Models are downloaded once, cached locally, and reused without any network calls.
-
-### **3. Local Data Layer (IndexedDB)**
-- All entries, embeddings, and summaries are stored securely in IndexedDB  
-- Storage is encrypted at rest  
-- Auto-save ensures journaling feels effortless  
-- Zero external transmission of text or metadata  
-
-This three-layer structure ensures clear separation of concerns while maintaining complete privacy and offline functionality.
+### Data layer (current state)
+- In-memory store seeded with mock data; new entries stay local for the session
+- No persistence yet; IndexedDB + encryption (Web Crypto) is a planned enhancement
+- No external transmission of text or metadata
 
 ---
 
 ## 3. Technical Approach
 
 ### **On-Device NLP Pipeline**
-Reflector integrates Hugging Face models through transformers.js to process journal text locally.  
-The pipeline includes:
+Reflector integrates small Hugging Face models through transformers.js to process journal text locally:
 
-1. **Sentiment Model**  
-   - Classifies each entry as positive, neutral, or negative  
-   - Produces a confidence score for trend visualization  
-
-2. **Embedding Model**  
-   - Converts each entry into a numerical embedding vector  
-   - Enables similarity detection, theme discovery, and clustering  
-
-3. **Theme Extraction & Clustering**  
-   - Computes cosine similarity between embeddings  
-   - Groups semantically related entries  
-   - Identifies frequently recurring concepts  
-
-4. **Insight Generation**  
-   Using analytic outputs, Reflector generates gentle summaries such as:  
-   > “Your entries were more positive on days when you mentioned being outdoors.”  
-   These summaries are produced using template-based natural language generation for reliability and tone control.
+1) **Sentiment**: classify each entry (pos/neu/neg + score) with `distilbert-base-uncased-finetuned-sst-2-english`.  
+2) **Embeddings**: convert each entry to a vector via `all-MiniLM-L6-v2` for cosine similarity.  
+3) **Themes & clustering**: semantic tags from rule-based cues; cluster similar entries via cosine similarity to surface recurring topics.  
+4) **Insight generation**: deterministic, template-based bullets grounded in the above signals (e.g., “Outdoors entries paired with better tone,” “Creative sessions showed up; capture ideas right after.”). No generative text leaves the models, and no remote calls happen after model download.
 
 ---
 
 ### **Contextual Prompt Engine**
-
-Prompts are generated by evaluating:
-- Recent themes  
-- Mood patterns  
-- Frequency of specific keywords  
-- Gaps in journaling behavior  
-
-Examples:
-- If user hasn’t written in a few days:  
-  *“What’s something small that stood out to you recently?”*  
-- If recent entries mention stress:  
-  *“What helped you navigate challenges today?”*  
-
-The system remains lightweight while still feeling personalized.
+- Uses the latest tagged entry to nudge writing (e.g., stressed → “What eased the stress?”, creative → “Capture the spark,” rest → “What made rest restorative?”).
+- No text generation; prompts are deterministic and local.
 
 ---
 
 ### **Data Model Design**
 
 ```ts
+```ts
+export type ThemeTag =
+  | "energized" | "tired" | "drained" | "stressed" | "calm" | "anxious"
+  | "creative" | "social" | "rest" | "focused" | "grateful";
+
 export type JournalEntry = {
   id: string;
   createdAt: string;
@@ -128,6 +97,7 @@ export type JournalEntry = {
   sentiment?: "positive" | "neutral" | "negative";
   sentimentScore?: number;
   embedding?: number[];
+  tags?: ThemeTag[];
 };
 
 export type InsightSummary = {
@@ -138,3 +108,33 @@ export type InsightSummary = {
   themeKeywords: string[];
   generatedAt: string;
 };
+```
+
+---
+
+## Technical Stack
+- **Language/Framework**: TypeScript + React
+- **AI runtime**: transformers.js (`@xenova/transformers`)
+- **Models**: SST-2 for sentiment; MiniLM for embeddings; rule-based themes/insights
+- **Styling/build**: CSS modules in-app; Vite for dev/build
+
+## Security & Privacy
+- All NLP runs locally in the browser; no text leaves the device after model download.
+- No external telemetry; only initial model fetch if not cached.
+- Planned storage hardening: encrypted IndexedDB for entries/embeddings/summaries with Web Crypto; keys remain client-side. No server round-trips.
+- Model integrity: pin model IDs/versions; consider bundling weights locally or serving from a trusted origin to avoid remote fetch at runtime.
+- Explainability: deterministic themes and template summaries make outputs auditable; sentiment/tags/embeddings are inspectable per entry.
+
+### Model loading considerations
+- Hugging Face models via transformers.js can be heavy to fetch/compile in-browser. First-load latency depends on network and device; caching helps, but offline bundling or local hosting is recommended for reliability.
+- WASM/ONNX performance varies by device; quantized variants and web workers can reduce UI stalls. Pooling embedding requests and limiting to recent entries keeps compute bounded.
+- If remote fetch is blocked, a bundled or pre-cached model is needed to avoid failures; graceful error messages are important.
+
+## Future Enhancements
+- **Persistence**: encrypted IndexedDB for entries/embeddings/summaries; local keys only.
+- **Better themes**: add a small zero-shot classifier to refine tags per user and reduce rule bias.
+- **Richer clustering**: label clusters with exemplar sentences; show “related entries” per note.
+- **Offline/cache strategy**: bundle models with the app or serve from a trusted local origin; prewarm/cache to avoid first-load hiccups.
+- **Performance**: quantized models, web workers for inference, pooling/limiting embeddings to recent N entries.
+- **Personalization**: per-user tag weighting and prompt tuning based on their history (still local-only).
+- **Robustness**: clearer error UX when models can’t load; fallback to last-known tags/summaries without sending data off-device.
