@@ -25,4 +25,44 @@ export const mockEntries: JournalEntry[] = [
     sentiment: "negative",
     sentimentScore: 0.34,
   },
+  {
+    id: "entry-4",
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
+    text:
+      "Sunday reset day: longer stretch of rest, cooked a simple meal, and sketched a few ideas for the side project. The creative time felt light because I had already taken a long walk and cleared my head.",
+    sentiment: "positive",
+    sentimentScore: 0.78,
+  },
+  {
+    id: "entry-5",
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
+    text:
+      "Felt stressed after back-to-back calls. Took a 15 minute break outside and noticed my shoulders drop. Later in the evening, another short walk helped me map out the next steps without the noise.",
+    sentiment: "negative",
+    sentimentScore: 0.41,
+  },
+  {
+    id: "entry-6",
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
+    text:
+      "Woke up early and wrote down three creative ideas right after a quick morning walk. Energy stayed higher all morning. Added a midday stretch to keep momentum and it worked surprisingly well.",
+    sentiment: "positive",
+    sentimentScore: 0.9,
+  },
+  {
+    id: "entry-7",
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(),
+    text:
+      "Sleep was rough last night. I felt foggy until I paused for a breathing exercise and a glass of water. No walk today, but journaling a few lines helped me reset expectations for the afternoon.",
+    sentiment: "neutral",
+    sentimentScore: 0.47,
+  },
+  {
+    id: "entry-8",
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(),
+    text:
+      "Creative sprint after dinner: outlined two chapters for the article and captured ten ideas. The focus felt easier after a light stretch and turning off all notifications for an hour.",
+    sentiment: "positive",
+    sentimentScore: 0.82,
+  },
 ];
