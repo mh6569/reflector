@@ -1,7 +1,7 @@
 # Reflector — Quick Start
 
-## Demo
-- [demo](https://youtu.be/-XQZkCJKQoY)
+## Presentation
+- [video link](https://youtu.be/-XQZkCJKQoY)
 
 ## Prerequisites
 - Node.js 18+
