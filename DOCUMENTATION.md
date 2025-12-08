@@ -38,6 +38,12 @@ These summaries help users connect the dots in their own lives without manual ef
 - Fully encrypted storage  
 - All analysis runs locally on-device  
 
+### Engagement goals (PoC)
+- Make daily writing effortless: context-aware prompt sits above the entry box.
+- Reward consistency with weekly insights instead of streak shaming.
+- Keep the UI calm and non-judgmental; no public feeds, no social pressure.
+- Show quick wins: newest entries first with immediate tags and mood readouts.
+
 ---
 
 ---
@@ -139,6 +145,7 @@ export type InsightSummary = {
 - **Personalization**: per-user tag weighting and prompt tuning based on their history (still local-only).
 - **Robustness**: clearer error UX when models can’t load; fallback to last-known tags/summaries without sending data off-device.
 - **Auth (future)**: optional local-first login with biometric/device credentials; never store raw entries off-device. If cloud sync is added, encrypt client-side with user-held keys; no server access to plaintext.
+- **Engagement experiments**: gentle streaks, “return tomorrow” nudges, and small prompt rotations based on recent themes—always opt-in and local.
 
 ## Architecture (Mermaid)
 ```mermaid
