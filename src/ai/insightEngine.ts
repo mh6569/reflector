@@ -130,18 +130,28 @@ const sentimentClient = new SentimentClient();
 const embeddingClient = new EmbeddingClient();
 
 export async function analyzeEntries(entries: JournalEntry[]): Promise<JournalEntry[]> {
-  await Promise.all([sentimentClient.load(), embeddingClient.load()]);
+  try {
+    await Promise.all([sentimentClient.load(), embeddingClient.load()]);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Model load failed.";
+    throw new Error(message);
+  }
   const enriched: JournalEntry[] = [];
   for (const entry of entries) {
-    const s = await sentimentClient.analyze(entry.text);
-    const embedding = await embeddingClient.embed(entry.text);
-    enriched.push({
-      ...entry,
-      sentiment: s.sentiment,
-      sentimentScore: s.score,
-      tags: inferTags(entry.text),
-      embedding,
-    });
+    try {
+      const s = await sentimentClient.analyze(entry.text);
+      const embedding = await embeddingClient.embed(entry.text);
+      enriched.push({
+        ...entry,
+        sentiment: s.sentiment,
+        sentimentScore: s.score,
+        tags: inferTags(entry.text),
+        embedding,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Entry analysis failed.";
+      throw new Error(`Entry "${entry.id}" analysis failed: ${message}`);
+    }
   }
   return enriched;
 }

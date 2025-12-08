@@ -185,6 +185,11 @@ export default function App() {
         </div>
         <div className="pill">Local AI analysis</div>
       </div>
+      {error && (
+        <div className="callout danger" style={{ marginBottom: "1rem" }}>
+          <strong>Analysis issue.</strong> {error}
+        </div>
+      )}
       <div className="entry-list">
         <div className="card">
           <h3>Context-aware prompt</h3>

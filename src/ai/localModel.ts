@@ -13,10 +13,16 @@ export class SentimentClient {
     if (this.classifier) return;
     env.allowLocalModels = false;
     env.remoteModels = true;
-    this.classifier = (await pipeline(
-      "sentiment-analysis",
-      "Xenova/distilbert-base-uncased-finetuned-sst-2-english",
-    )) as SentimentClassifier;
+    try {
+      this.classifier = (await pipeline(
+        "sentiment-analysis",
+        "Xenova/distilbert-base-uncased-finetuned-sst-2-english",
+      )) as SentimentClassifier;
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Sentiment model failed to load.";
+      throw new Error(`Unable to load sentiment model: ${message}`);
+    }
   }
 
   async analyze(text: string): Promise<{ sentiment: Sentiment; score: number }> {
@@ -36,7 +42,16 @@ export class EmbeddingClient {
     if (this.embedder) return;
     env.allowLocalModels = false;
     env.remoteModels = true;
-    this.embedder = (await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2")) as EmbeddingPipeline;
+    try {
+      this.embedder = (await pipeline(
+        "feature-extraction",
+        "Xenova/all-MiniLM-L6-v2",
+      )) as EmbeddingPipeline;
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Embedding model failed to load.";
+      throw new Error(`Unable to load embedding model: ${message}`);
+    }
   }
 
   async embed(text: string): Promise<number[]> {
